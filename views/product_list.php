@@ -4,144 +4,161 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Danh sách sản phẩm</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-            min-height: 100vh;
-            padding: 20px;
-        }
-        
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-        
-        .header {
-            text-align: center;
-            color: white;
-            margin-bottom: 30px;
-        }
-        
-        .back-button {
-            display: inline-block;
-            margin-bottom: 20px;
-            text-decoration: none;
-            background: #2196F3;
-            color: white;
-            padding: 10px 20px;
+        .product-img {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
             border-radius: 5px;
-            transition: background 0.3s;
         }
-        
-        .back-button:hover {
-            background: #1976D2;
-        }
-        
-        .products-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 20px;
-        }
-        
-        .product-card {
-            background: white;
-            border-radius: 10px;
-            overflow: hidden;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-            transition: transform 0.3s, box-shadow 0.3s;
-        }
-        
-        .product-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-        }
-        
-        .product-image {
-            width: 100%;
-            height: 200px;
-            background: linear-gradient(45deg, #6a11cb 0%, #2575fc 100%);
+        .header-actions {
             display: flex;
+            justify-content: space-between;
             align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 48px;
+            margin-bottom: 20px;
         }
-        
-        .product-info {
-            padding: 20px;
-        }
-        
-        .product-title {
-            font-size: 1.2em;
+        .price {
             font-weight: bold;
-            margin-bottom: 10px;
-            color: #333;
+            color: #dc3545;
         }
-        
-        .product-price {
-            color: #e91e63;
-            font-size: 1.3em;
-            font-weight: bold;
-            margin-bottom: 10px;
-        }
-        
-        .product-description {
-            color: #666;
-            line-height: 1.5;
-        }
-        
-        .no-products {
-            background: white;
-            padding: 40px;
-            text-align: center;
-            border-radius: 10px;
-            grid-column: 1 / -1;
+        .action-buttons .btn {
+            margin: 0 2px;
+            padding: 3px 8px;
+            font-size: 0.875rem;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <a href="index.php?page=home" class="back-button">← Quay lại trang chủ</a>
-        
-        <div class="header">
-            <h1>🛒 Danh sách sản phẩm</h1>
-            <p>Tổng số sản phẩm: <?php echo count($products); ?></p>
+    <div class="container mt-4">
+        <!-- Header với tiêu đề và nút thêm mới -->
+        <div class="header-actions">
+            <h1 class="h3 mb-0">📦 Quản lý sản phẩm</h1>
+            <div>
+                <a href="index.php?page=product-create" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> Thêm sản phẩm
+                </a>
+                <a href="index.php?page=home" class="btn btn-secondary">
+                    <i class="fas fa-home"></i> Trang chủ
+                </a>
+            </div>
         </div>
-        
-        <div class="products-grid">
-            <?php if (!empty($products)): ?>
-                <?php foreach ($products as $product): ?>
-                    <div class="product-card">
-                        <div class="product-image">
-                            📦
-                        </div>
-                        <div class="product-info">
-                            <h3 class="product-title">
-                                <?php echo htmlspecialchars($product['name'] ?? 'Sản phẩm không tên'); ?>
-                            </h3>
-                            <div class="product-price">
-                                <?php echo number_format($product['price'] ?? 0, 0, ',', '.') . ' ₫'; ?>
-                            </div>
-                            <p class="product-description">
-                                <?php echo htmlspecialchars($product['description'] ?? 'Không có mô tả'); ?>
-                            </p>
-                        </div>
+
+        <!-- Thông báo -->
+        <?php if (isset($_SESSION['success'])): ?>
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <?php echo $_SESSION['success']; unset($_SESSION['success']); ?>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        <?php endif; ?>
+
+        <?php if (isset($_SESSION['error'])): ?>
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <?php echo $_SESSION['error']; unset($_SESSION['error']); ?>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        <?php endif; ?>
+
+        <!-- Form tìm kiếm -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <form method="GET" action="index.php" class="row g-3">
+                    <input type="hidden" name="page" value="product-search">
+                    <div class="col-md-10">
+                        <input type="text" name="keyword" class="form-control" 
+                               placeholder="Tìm kiếm sản phẩm theo tên hoặc mô tả..."
+                               value="<?php echo $_GET['keyword'] ?? ''; ?>">
                     </div>
-                <?php endforeach; ?>
-            <?php else: ?>
-                <div class="no-products">
-                    <h2>📭 Không có sản phẩm nào</h2>
-                    <p>Vui lòng kiểm tra kết nối database hoặc thêm sản phẩm mới.</p>
+                    <div class="col-md-2">
+                        <button type="submit" class="btn btn-info w-100">
+                            <i class="fas fa-search"></i> Tìm kiếm
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Bảng sản phẩm -->
+        <div class="card">
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover table-striped">
+                        <thead class="table-dark">
+                            <tr>
+                                <th width="5%">ID</th>
+                                <th width="20%">Tên sản phẩm</th>
+                                <th width="15%">Giá</th>
+                                <th width="15%">Hình ảnh</th>
+                                <th width="15%">Danh mục</th>
+                                <th width="30%">Hành động</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php if (empty($products)): ?>
+                                <tr>
+                                    <td colspan="6" class="text-center text-muted py-4">
+                                        <i class="fas fa-box-open fa-2x mb-3"></i><br>
+                                        Không có sản phẩm nào
+                                    </td>
+                                </tr>
+                            <?php else: ?>
+                                <?php foreach ($products as $product): ?>
+                                <tr>
+                                    <td><?php echo $product['id']; ?></td>
+                                    <td>
+                                        <strong><?php echo htmlspecialchars($product['name']); ?></strong><br>
+                                        <small class="text-muted"><?php echo substr($product['description'], 0, 50) . '...'; ?></small>
+                                    </td>
+                                    <td class="price"><?php echo number_format($product['price'], 0, ',', '.'); ?> ₫</td>
+                                    <td>
+                                        <img src="<?php echo $product['image_url']; ?>" 
+                                             alt="<?php echo $product['name']; ?>" 
+                                             class="product-img">
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-info"><?php echo $product['category']; ?></span>
+                                    </td>
+                                    <td class="action-buttons">
+                                        <a href="index.php?page=product-detail&id=<?php echo $product['id']; ?>" 
+                                           class="btn btn-sm btn-info">
+                                            <i class="fas fa-eye"></i> Xem
+                                        </a>
+                                        <a href="index.php?page=product-edit&id=<?php echo $product['id']; ?>" 
+                                           class="btn btn-sm btn-warning">
+                                            <i class="fas fa-edit"></i> Sửa
+                                        </a>
+                                        <a href="index.php?page=product-delete&id=<?php echo $product['id']; ?>" 
+                                           class="btn btn-sm btn-danger"
+                                           onclick="return confirm('Bạn có chắc chắn muốn xóa sản phẩm này?')">
+                                            <i class="fas fa-trash"></i> Xóa
+                                        </a>
+                                    </td>
+                                </tr>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
+                        </tbody>
+                    </table>
                 </div>
-            <?php endif; ?>
+            </div>
+        </div>
+
+        <!-- Thống kê -->
+        <div class="mt-3 text-end">
+            <small class="text-muted">
+                Tổng số sản phẩm: <strong><?php echo count($products); ?></strong>
+            </small>
         </div>
     </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Xác nhận xóa
+        function confirmDelete() {
+            return confirm('Bạn có chắc chắn muốn xóa sản phẩm này?');
+        }
+    </script>
 </body>
 </html>
